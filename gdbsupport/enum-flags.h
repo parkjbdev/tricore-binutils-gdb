@@ -88,15 +88,13 @@ template<> struct integer_for_size<2, 1> { typedef int16_t type; };
 template<> struct integer_for_size<4, 1> { typedef int32_t type; };
 template<> struct integer_for_size<8, 1> { typedef int64_t type; };
 
+/* aurix-mac-dap: T (-1) on an enum without negative values is a hard error in
+   recent clang (enum-constexpr-conversion); use the language's own trait, as
+   later GDB releases do.  */
 template<typename T>
 struct enum_underlying_type
 {
-  DIAGNOSTIC_PUSH
-  DIAGNOSTIC_IGNORE_ENUM_CONSTEXPR_CONVERSION
-  typedef typename
-    integer_for_size<sizeof (T), static_cast<bool>(T (-1) < T (0))>::type
-    type;
-  DIAGNOSTIC_POP
+  typedef typename std::underlying_type<T>::type type;
 };
 
 namespace enum_flags_detail
