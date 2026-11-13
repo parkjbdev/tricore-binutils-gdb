@@ -234,16 +234,24 @@ mcs_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Set the howto pointer for an Lattice Mico32 ELF reloc.  */
 
-static void
-mcs_info_to_howto_rela (bfd *abfd ATTRIBUTE_UNUSED,
+static bool
+mcs_info_to_howto_rela (bfd *abfd,
                          arelent *cache_ptr,
                          Elf_Internal_Rela *dst)
 {
   unsigned int r_type;
 
   r_type = ELF32_R_TYPE (dst->r_info);
-  BFD_ASSERT (r_type < (unsigned int) R_MCS_max);
+  if (r_type >= (unsigned int) R_MCS_max)
+    {
+      /* xgettext:c-format */
+      _bfd_error_handler (_("%pB: unsupported relocation type %#x"),
+                          abfd, r_type);
+      bfd_set_error (bfd_error_bad_value);
+      return false;
+    }
   cache_ptr->howto = &mcs_elf_howto_table[r_type];
+  return true;
 }
 
 /* Handle the R_PPC_ADDR16_HA and R_PPC_REL16_HA relocs.  */
